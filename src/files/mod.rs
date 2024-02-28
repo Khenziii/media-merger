@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use metadata::media_file::MediaFileMetadata;
 
 /// converts a string in this format: "HH:MM:SS.ss"
@@ -33,21 +33,57 @@ fn convert_duration_to_milliseconds_from_string(string: String) -> i32 {
     panic!("Failed to convert the duration String to i32.");
 }
 
-fn get_files(from_dir: &str) -> Vec<String> {
-    let files = fs::read_dir(from_dir)
+pub struct Files {
+    pub(crate) audio: PathBuf,
+    pub(crate) image: PathBuf,
+    pub(crate) video: PathBuf,
+}
+
+impl Files {
+    fn get_values(&self) -> Vec<PathBuf> {
+        return vec![
+            self.audio.clone(),
+            self.image.clone(),
+            self.video.clone(),
+        ];
+    }
+}
+
+pub fn get_files(from_dir: &str) -> Files {
+    let dir_content: Vec<String> = fs::read_dir(from_dir)
         .expect(&*format!("Failed to read contents of the directory {}!", from_dir))
-        .filter_map(|entry| {
+        .map(|entry| {
             return match entry {
                 Ok(entry) => {
-                    Some(entry.file_name().into_string().expect("Failed to get filenames string!"))
+                    entry.file_name().into_string().expect("Failed to get filenames string!")
                 },
                 Err(e) => {
-                    eprintln!("Error reading directory entry: {}", e);
-                    None
+                    panic!("Error reading directory: {}, entry: {}", from_dir, e);
                 }
             }
         })
         .collect::<Vec<_>>();
+
+    let mut files = Files {
+        audio: PathBuf::new(),
+        image: PathBuf::new(),
+        video: PathBuf::new(),
+    };
+
+    for file in dir_content {
+        let filename_without_extension = file.split(".").collect::<Vec<&str>>()[0];
+
+        if ["audio", "image", "video"].contains(&filename_without_extension) {
+            let formatted_path = &format!("{}/{}", from_dir, file);
+            let path = Path::new(&formatted_path);
+            match filename_without_extension {
+                "audio" => files.audio = path.to_path_buf(),
+                "image" => files.image = path.to_path_buf(),
+                "video" => files.video = path.to_path_buf(),
+                _ => (),
+            }
+        }
+    }
 
     return files;
 }
@@ -67,15 +103,19 @@ pub fn validate_env(input_dir: &str, output_dir: &str) {
     // validate presence of required files in the input directory
     let expected_files = ["audio", "image", "video"];
     let present_files = get_files(&input_dir);
-    let present_filenames: Vec<&str> = present_files
-        .iter()
-        .map(|file| {
-            return file.split(".").collect::<Vec<_>>()[0];
+    let present_filenames: Vec<String> = present_files
+        .get_values()
+        .into_iter()
+        .filter_map(|entry| {
+            return entry
+                .to_str()
+                .map(|s| s.to_string());
         })
         .collect();
 
     for file in &expected_files {
-        let exists = present_filenames.contains(&file);
+        let string = String::from(*file);
+        let exists = present_filenames.contains(&string);
 
         if !exists {
             panic!("File: {} is missing in the {} directory", file, input_dir);
@@ -83,8 +123,8 @@ pub fn validate_env(input_dir: &str, output_dir: &str) {
     }
 }
 
-pub fn get_length_of_audio_file(file_path: &str) -> i32 {
-    let metadata = MediaFileMetadata::new(&Path::new(file_path)).unwrap();
+pub fn get_length_of_audio_file(file_path: String) -> i32 {
+    let metadata = MediaFileMetadata::new(&Path::new(&file_path)).unwrap();
     let duration_string: String = match metadata.duration {
         Some(s) => s,
         None => panic!("The audio file is probably corrupted."),
