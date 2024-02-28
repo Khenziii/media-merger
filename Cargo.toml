@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 metadata = "0.1.8"
+pbr = "1.1.1"
