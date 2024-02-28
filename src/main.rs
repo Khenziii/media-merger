@@ -1,3 +1,5 @@
+mod files;
+
 fn main() {
-    println!("Hello, world!");
+    let files = files::get_files("./input");
 }
