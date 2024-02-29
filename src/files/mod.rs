@@ -126,11 +126,11 @@ pub fn validate_env(input_dir: &str, output_dir: &str) {
     }
 }
 
-pub fn get_length_of_audio_file(file_path: String) -> i32 {
+pub fn get_length_of_file(file_path: &String) -> i32 {
     let metadata = MediaFileMetadata::new(&Path::new(&file_path)).unwrap();
     let duration_string: String = match metadata.duration {
         Some(s) => s,
-        None => panic!("The audio file is probably corrupted."),
+        None => panic!("The file is probably corrupted."),
     };
     let duration_milliseconds = convert_duration_to_milliseconds_from_string(duration_string);
 
