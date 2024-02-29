@@ -33,6 +33,7 @@ fn convert_duration_to_milliseconds_from_string(string: String) -> i32 {
     panic!("Failed to convert the duration String to i32.");
 }
 
+#[derive(Debug)]
 pub struct Files {
     pub(crate) audio: PathBuf,
     pub(crate) image: PathBuf,
@@ -108,14 +109,16 @@ pub fn validate_env(input_dir: &str, output_dir: &str) {
         .into_iter()
         .filter_map(|entry| {
             return entry
-                .to_str()
-                .map(|s| s.to_string());
+                .with_extension("")
+                .display()
+                .to_string()
+                .into()
         })
         .collect();
 
     for file in &expected_files {
-        let string = String::from(*file);
-        let exists = present_filenames.contains(&string);
+        let formatted_file = format!("{}/{}", input_dir, &file);
+        let exists = present_filenames.contains(&formatted_file);
 
         if !exists {
             panic!("File: {} is missing in the {} directory", file, input_dir);
