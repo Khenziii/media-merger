@@ -1,9 +1,11 @@
 use crate::files::get_length_of_file;
-use std::process::{Command, ExitStatus, exit};
+use std::process::{Command, ExitStatus, exit, Stdio};
 use std::io;
 
 fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &String, output_file: &String) -> ExitStatus {
     let status = Command::new("ffmpeg")
+        // .stdout(Stdio::null())
+        // .stderr(Stdio::null())
         .arg("-i")
         .arg(input_file)
         .arg("-ss")
@@ -38,7 +40,7 @@ pub fn split_video_to_equal_parts(video: String, output_dir: String, part_length
         }
     }
 
-    for i in 1..amount_of_videos_to_generate {
+    for i in 1..=amount_of_videos_to_generate {
         let start_time = (i - 1) * part_length;
         let output_filename = format!("{}/{}.mp4", output_dir, i);
 
