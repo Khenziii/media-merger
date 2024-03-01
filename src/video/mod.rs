@@ -1,9 +1,15 @@
 use crate::files::get_length_of_file;
 use std::process::{Command, ExitStatus, exit, Stdio};
 use std::io;
+use std::path::{PathBuf, Path};
 
-fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &String, output_file: &String) -> ExitStatus {
-    let status = Command::new("ffmpeg")
+struct GeneratedVideoInfo {
+    status: ExitStatus,
+    path: PathBuf,
+}
+
+fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &String, output_file: &String) -> GeneratedVideoInfo {
+    let exit_status = Command::new("ffmpeg")
         // .stdout(Stdio::null())
         // .stderr(Stdio::null())
         .arg("-i")
@@ -15,13 +21,18 @@ fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &S
         .arg(output_file)
         .status()
         .expect("Something went wrong while creating video's segments");
+    let video_path = Path::new(output_file);
 
-    return status
+    return GeneratedVideoInfo {
+        status: exit_status,
+        path: video_path.to_path_buf(),
+    }
 }
 
-pub fn split_video_to_equal_parts(video: String, output_dir: String, part_length: i32, warning: bool) {
+pub fn split_video_to_equal_parts(video: String, output_dir: String, part_length: i32, warning: bool) -> Vec<PathBuf> {
     let videos_length = get_length_of_file(&video);
     let amount_of_videos_to_generate = videos_length / part_length;
+    let mut videos: Vec<PathBuf> = vec![];
 
     if warning {
         let mut input = String::new();
@@ -44,6 +55,9 @@ pub fn split_video_to_equal_parts(video: String, output_dir: String, part_length
         let start_time = (i - 1) * part_length;
         let output_filename = format!("{}/{}.mp4", output_dir, i);
 
-        split_video(start_time, part_length, &video, &output_filename);
+        let video = split_video(start_time, part_length, &video, &output_filename);
+        videos.push(video.path);
     }
+
+    return videos;
 }
