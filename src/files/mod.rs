@@ -124,6 +124,15 @@ pub fn validate_env(input_dir: &str, output_dir: &str) {
             panic!("File: {} is missing in the {} directory", file, input_dir);
         }
     }
+
+    // make sure, that output directory is empty
+    let is_empty = fs::read_dir(output_dir)
+        .unwrap()
+        .count() == 0;
+
+    if !is_empty {
+        panic!("Directory: {} is not empty! Please make sure, that it doesn't contain any files.", output_dir)
+    }
 }
 
 pub fn get_length_of_file(file_path: &String) -> i32 {
