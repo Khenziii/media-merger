@@ -1,4 +1,4 @@
-use std::fs;
+use std::{env, fs};
 use std::path::{Path, PathBuf};
 use metadata::media_file::MediaFileMetadata;
 
@@ -126,9 +126,11 @@ pub fn validate_env(input_dir: &str, output_dir: &str) {
     }
 
     // make sure, that output directory is empty
+    let in_dev_env = env::var("MEDIA_MERGER_ENV").unwrap_or_default() == "DEV";
+
     let is_empty = fs::read_dir(output_dir)
         .unwrap()
-        .count() == 0;
+        .count() == if in_dev_env { 1 } else { 0 }; // README.md..
 
     if !is_empty {
         panic!("Directory: {} is not empty! Please make sure, that it doesn't contain any files.", output_dir)
