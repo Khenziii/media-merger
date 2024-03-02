@@ -1,18 +1,30 @@
 use crate::files::get_length_of_file;
 extern crate pbr;
-use std::process::{Command, ExitStatus, exit, Stdio};
+use std::process::{Command, ExitStatus, exit, Stdio, ChildStdout};
 use std::io;
 use std::path::{PathBuf, Path};
 use std::fs::{remove_file, rename};
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Stdout};
 use pbr::ProgressBar;
 
-struct GeneratedVideoInfo {
-    // status: ExitStatus,
-    path: PathBuf,
+fn update_progress_bar(stdout: &mut ChildStdout, pb: &mut ProgressBar<Stdout>) {
+    let reader = BufReader::new(stdout);
+
+    for potential_line in reader.lines() {
+        let line = potential_line.expect("Failed to read a line!");
+        if !line.starts_with("frame=") { continue };
+
+        let current_frame = &line
+            .split("=")
+            .collect::<Vec<&str>>()[1]
+            .parse::<u64>()
+            .expect("Failed to convert to u32!");
+
+        pb.set(*current_frame);
+    }
 }
 
-fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &String, output_file: &String) -> GeneratedVideoInfo {
+fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &String, output_file: &String) -> PathBuf {
     let length_seconds = length_milliseconds / 1000;
     let total_frames = length_seconds * 30; // TODO: Get accurate framerate later
     let mut pb = ProgressBar::new(total_frames as u64);
@@ -34,29 +46,13 @@ fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &S
         .expect("Something went wrong while creating video's segments");
 
     if let Some(ref mut stdout) = output.stdout {
-        let reader = BufReader::new(stdout);
-
-        for potential_line in reader.lines() {
-            let line = potential_line.expect("Failed to read a line!");
-            if !line.starts_with("frame=") { continue };
-
-            let current_frame = &line
-                .split("=")
-                .collect::<Vec<&str>>()[1]
-                .parse::<u64>()
-                .expect("Failed to convert to u32!");
-
-            pb.set(*current_frame);
-        }
+        update_progress_bar(stdout, &mut pb);
     }
 
     pb.finish_print("Success!");
 
     let video_path = Path::new(output_file);
-    return GeneratedVideoInfo {
-        // status: exit_status,
-        path: video_path.to_path_buf(),
-    }
+    return video_path.to_path_buf();
 }
 
 fn add_audio_to_video(video: &String, audio: &String) {
@@ -97,20 +93,7 @@ fn add_audio_to_video(video: &String, audio: &String) {
         .expect("Something went wrong while applying audio to videos.");
 
     if let Some(ref mut stdout) = output.stdout {
-        let reader = BufReader::new(stdout);
-
-        for potential_line in reader.lines() {
-            let line = potential_line.expect("Failed to read a line!");
-            if !line.starts_with("frame=") { continue };
-
-            let current_frame = &line
-                .split("=")
-                .collect::<Vec<&str>>()[1]
-                .parse::<u64>()
-                .expect("Failed to convert to u32!");
-
-            pb.set(*current_frame);
-        }
+        update_progress_bar(stdout, &mut pb);
     }
 
     // replace old video with the new one
@@ -154,20 +137,7 @@ fn add_image_to_video(video: &String, image: &String) {
         .expect("Something went wrong while adding image to videos.");
 
     if let Some(ref mut stdout) = output.stdout {
-        let reader = BufReader::new(stdout);
-
-        for potential_line in reader.lines() {
-            let line = potential_line.expect("Failed to read a line!");
-            if !line.starts_with("frame=") { continue };
-
-            let current_frame = &line
-                .split("=")
-                .collect::<Vec<&str>>()[1]
-                .parse::<u64>()
-                .expect("Failed to convert to u32!");
-
-            pb.set(*current_frame);
-        }
+        update_progress_bar(stdout, &mut pb);
     }
 
     // replace old video with the new one
@@ -203,8 +173,8 @@ pub fn split_video_to_equal_parts(video: String, output_dir: String, part_length
         let start_time = (i - 1) * part_length;
         let output_filename = format!("{}/{}.mp4", output_dir, i);
 
-        let video = split_video(start_time, part_length, &video, &output_filename);
-        videos.push(video.path);
+        let video_path = split_video(start_time, part_length, &video, &output_filename);
+        videos.push(video_path);
     }
 
     return videos;
