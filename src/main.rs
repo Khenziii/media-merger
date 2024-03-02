@@ -14,10 +14,17 @@ fn main() {
         true,
     );
     video::add_audio_to_videos(
-        segments,
+        &segments,
         passed_files.audio
             .to_str()
             .expect("Failed to convert PathBuf to &str")
             .to_string()
-    )
+    );
+    video::add_image_to_videos(
+        &segments,
+        passed_files.image
+            .to_str()
+            .expect("Failed to convert PathBuf to &str")
+            .to_string()
+    );
 }

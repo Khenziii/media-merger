@@ -31,7 +31,7 @@ fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &S
 }
 
 fn add_audio_to_video(video: &String, audio: &String) -> ExitStatus {
-    let video_without_extension = Path::new(&video)
+    let video_without_extension = Path::new(video)
         .file_name()
         .expect("Couldn't find passed video!")
         .to_str()
@@ -61,8 +61,41 @@ fn add_audio_to_video(video: &String, audio: &String) -> ExitStatus {
         .expect("Something went wrong while applying audio to videos.");
 
     // replace old video with the new one
-    remove_file(&video).expect("Failed to remove a video!");
-    rename(output_filename.to_string(), &video).expect("Failed to rename a video!");
+    remove_file(video).expect("Failed to remove a video!");
+    rename(output_filename.to_string(), video).expect("Failed to rename a video!");
+
+    return exit_status;
+}
+
+fn add_image_to_video(video: &String, image: &String) -> ExitStatus {
+    let video_without_extension = Path::new(video)
+        .file_name()
+        .expect("Couldn't find passed video!")
+        .to_str()
+        .expect("Wasn't able to convert to &str");
+    let video_parent_folder = Path::new(video)
+        .parent()
+        .expect("Failed to get video's parent dir!")
+        .to_str()
+        .expect("Wasn't able to convert video's parent directory name to &str");
+    let output_filename = format!("{}/{}_temp.mp4", video_parent_folder, video_without_extension);
+
+    let exit_status = Command::new("ffmpeg")
+        .arg("-i")
+        .arg(video)
+        .arg("-i")
+        .arg(image)
+        .arg("-filter_complex")
+        .arg("[0:v][1:v] overlay=(W-w)/2:(H-h)/2")
+        .arg("-c:a")
+        .arg("copy")
+        .arg(&output_filename)
+        .status()
+        .expect("Something went wrong while adding image to videos.");
+
+    // replace old video with the new one
+    remove_file(video).expect("Failed to remove a video!");
+    rename(output_filename.to_string(), video).expect("Failed to rename a video!");
 
     return exit_status;
 }
@@ -100,14 +133,26 @@ pub fn split_video_to_equal_parts(video: String, output_dir: String, part_length
     return videos;
 }
 
-pub fn add_audio_to_videos(videos: Vec<PathBuf>, audio: String) {
+pub fn add_audio_to_videos(videos: &Vec<PathBuf>, audio: String) {
     for video in videos {
         add_audio_to_video(
             &video
                 .to_str()
-                .expect("Failed to convert path to str")
+                .expect("Failed to convert path to &str")
                 .to_string(),
             &audio,
+        );
+    }
+}
+
+pub fn add_image_to_videos(videos: &Vec<PathBuf>, image: String) {
+    for video in videos {
+        add_image_to_video(
+            &video
+                .to_str()
+                .expect("Failed to convert path to &str")
+                .to_string(),
+            &image,
         );
     }
 }
