@@ -18,7 +18,7 @@ _extension of these files don't matter, as long as they're supported by FFmpeg &
 
 While output has to be empty. 
 
-For more info on input directory read [this](), and for details about output folder, consider giving [this thing]() a read.
+For more info on input directory read [this](https://github.com/Khenziii/media-merger/blob/master/input/README.md), and for details about output folder, consider giving [this thing](https://github.com/Khenziii/media-merger/blob/master/output/README.md) a read.
 
 ### Contributing
 Every contribution is welcomed. I will review all PRs and issues.

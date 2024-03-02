@@ -2,6 +2,6 @@
 
 They will be named respectively 1.mp4, 2.mp4, etc.
 
-For more info on how to generate videos, visit [input/README.md](). If you'll encounter any problems, feel free to open a issue on GitHub!
+For more info on how to generate videos, visit [input/README.md](https://github.com/Khenziii/media-merger/blob/master/input/README.md). If you'll encounter any problems, feel free to open a issue on GitHub!
 
 This file should be deleted before generating videos (output directory always has to be empty).
