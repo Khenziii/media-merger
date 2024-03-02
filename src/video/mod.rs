@@ -1,9 +1,11 @@
 use crate::files::get_length_of_file;
+extern crate pbr;
 use std::process::{Command, ExitStatus, exit, Stdio};
 use std::io;
 use std::path::{PathBuf, Path};
 use std::fs::{remove_file, rename};
 use std::io::{BufRead, BufReader};
+use pbr::ProgressBar;
 
 struct GeneratedVideoInfo {
     // status: ExitStatus,
@@ -11,6 +13,11 @@ struct GeneratedVideoInfo {
 }
 
 fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &String, output_file: &String) -> GeneratedVideoInfo {
+    let length_seconds = length_milliseconds / 1000;
+    let total_frames = length_seconds * 30; // TODO: Get accurate framerate later
+    let mut pb = ProgressBar::new(total_frames as u64);
+    pb.format("[=>#]");
+
     let mut output = Command::new("ffmpeg")
         .arg("-i")
         .arg(input_file)
@@ -32,10 +39,19 @@ fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &S
 
         for potential_line in reader.lines() {
             let line = potential_line.expect("Failed to read a line!");
+            if !line.starts_with("frame=") { continue };
 
-            println!("{}", line);
+            let current_frame = &line
+                .split("=")
+                .collect::<Vec<&str>>()[1]
+                .parse::<u64>()
+                .expect("Failed to convert to u32!");
+
+            pb.set(*current_frame);
         }
     }
+
+    pb.finish_print("Success!");
 
     return GeneratedVideoInfo {
         // status: exit_status,
