@@ -13,6 +13,7 @@ fn main() {
         audio_file_duration,
         true,
     );
+    println!("The video has been split to equal parts.");
     video::add_audio_to_videos(
         &segments,
         passed_files.audio
@@ -20,6 +21,7 @@ fn main() {
             .expect("Failed to convert PathBuf to &str")
             .to_string()
     );
+    println!("Audio has been applied to all videos.");
     video::add_image_to_videos(
         &segments,
         passed_files.image
@@ -27,4 +29,7 @@ fn main() {
             .expect("Failed to convert PathBuf to &str")
             .to_string()
     );
+    println!("The image has been added to every video.");
+
+    println!("Done! Thank you for using media-merger.");
 }
