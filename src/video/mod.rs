@@ -29,7 +29,6 @@ fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &S
 
     if let Some(ref mut stdout) = output.stdout {
         let reader = BufReader::new(stdout);
-        // let re = Regex::new(r"frame=\s*(\d+)").unwrap();
 
         for potential_line in reader.lines() {
             let line = potential_line.expect("Failed to read a line!");
