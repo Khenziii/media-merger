@@ -3,29 +3,43 @@ use std::process::{Command, ExitStatus, exit, Stdio};
 use std::io;
 use std::path::{PathBuf, Path};
 use std::fs::{remove_file, rename};
+use std::io::{BufRead, BufReader};
 
 struct GeneratedVideoInfo {
-    status: ExitStatus,
+    // status: ExitStatus,
     path: PathBuf,
 }
 
 fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &String, output_file: &String) -> GeneratedVideoInfo {
-    let exit_status = Command::new("ffmpeg")
-        // .stdout(Stdio::null())
-        // .stderr(Stdio::null())
+    let mut output = Command::new("ffmpeg")
         .arg("-i")
         .arg(input_file)
         .arg("-ss")
         .arg(format!("{}", start_milliseconds / 1000))
         .arg("-t")
         .arg(format!("{}", length_milliseconds / 1000))
+        .arg("-progress")
+        .arg("pipe:1")
         .arg(output_file)
-        .status()
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
         .expect("Something went wrong while creating video's segments");
     let video_path = Path::new(output_file);
 
+    if let Some(ref mut stdout) = output.stdout {
+        let reader = BufReader::new(stdout);
+        // let re = Regex::new(r"frame=\s*(\d+)").unwrap();
+
+        for potential_line in reader.lines() {
+            let line = potential_line.expect("Failed to read a line!");
+
+            println!("{}", line);
+        }
+    }
+
     return GeneratedVideoInfo {
-        status: exit_status,
+        // status: exit_status,
         path: video_path.to_path_buf(),
     }
 }
