@@ -175,6 +175,10 @@ pub fn split_video_to_equal_parts(video: String, output_dir: String, part_length
 
         let video_path = split_video(start_time, part_length, &video, &output_filename);
         videos.push(video_path);
+
+        // this end of line is necessary, to
+        // avoid progress bars overlaying each other
+        println!();
     }
 
     return videos;
@@ -189,6 +193,8 @@ pub fn add_audio_to_videos(videos: &Vec<PathBuf>, audio: String) {
                 .to_string(),
             &audio,
         );
+
+        println!();
     }
 }
 
@@ -201,5 +207,7 @@ pub fn add_image_to_videos(videos: &Vec<PathBuf>, image: String) {
                 .to_string(),
             &image,
         );
+
+        println!();
     }
 }
