@@ -32,7 +32,6 @@ fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &S
         .stderr(Stdio::piped())
         .spawn()
         .expect("Something went wrong while creating video's segments");
-    let video_path = Path::new(output_file);
 
     if let Some(ref mut stdout) = output.stdout {
         let reader = BufReader::new(stdout);
@@ -53,13 +52,14 @@ fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &S
 
     pb.finish_print("Success!");
 
+    let video_path = Path::new(output_file);
     return GeneratedVideoInfo {
         // status: exit_status,
         path: video_path.to_path_buf(),
     }
 }
 
-fn add_audio_to_video(video: &String, audio: &String) -> ExitStatus {
+fn add_audio_to_video(video: &String, audio: &String) {
     let video_without_extension = Path::new(video)
         .file_name()
         .expect("Couldn't find passed video!")
@@ -72,7 +72,12 @@ fn add_audio_to_video(video: &String, audio: &String) -> ExitStatus {
         .expect("Wasn't able to convert video's parent directory name to &str");
     let output_filename = format!("{}/{}_temp.mp4", video_parent_folder, video_without_extension);
 
-    let exit_status = Command::new("ffmpeg")
+    let length_seconds = get_length_of_file(video) / 1000;
+    let total_frames = length_seconds * 30; // TODO: Get accurate framerate later
+    let mut pb = ProgressBar::new(total_frames as u64);
+    pb.format("[=>#]");
+
+    let mut output = Command::new("ffmpeg")
         .arg("-i")
         .arg(video)
         .arg("-i")
@@ -86,17 +91,36 @@ fn add_audio_to_video(video: &String, audio: &String) -> ExitStatus {
         .arg("-c:v")
         .arg("copy")
         .arg(&output_filename)
-        .status()
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
         .expect("Something went wrong while applying audio to videos.");
+
+    if let Some(ref mut stdout) = output.stdout {
+        let reader = BufReader::new(stdout);
+
+        for potential_line in reader.lines() {
+            let line = potential_line.expect("Failed to read a line!");
+            if !line.starts_with("frame=") { continue };
+
+            let current_frame = &line
+                .split("=")
+                .collect::<Vec<&str>>()[1]
+                .parse::<u64>()
+                .expect("Failed to convert to u32!");
+
+            pb.set(*current_frame);
+        }
+    }
 
     // replace old video with the new one
     remove_file(video).expect("Failed to remove a video!");
     rename(output_filename.to_string(), video).expect("Failed to rename a video!");
 
-    return exit_status;
+    pb.finish_print("Success!");
 }
 
-fn add_image_to_video(video: &String, image: &String) -> ExitStatus {
+fn add_image_to_video(video: &String, image: &String) {
     let video_without_extension = Path::new(video)
         .file_name()
         .expect("Couldn't find passed video!")
@@ -109,7 +133,12 @@ fn add_image_to_video(video: &String, image: &String) -> ExitStatus {
         .expect("Wasn't able to convert video's parent directory name to &str");
     let output_filename = format!("{}/{}_temp.mp4", video_parent_folder, video_without_extension);
 
-    let exit_status = Command::new("ffmpeg")
+    let length_seconds = get_length_of_file(video) / 1000;
+    let total_frames = length_seconds * 30; // TODO: Get accurate framerate later
+    let mut pb = ProgressBar::new(total_frames as u64);
+    pb.format("[=>#]");
+
+    let mut output = Command::new("ffmpeg")
         .arg("-i")
         .arg(video)
         .arg("-i")
@@ -119,14 +148,33 @@ fn add_image_to_video(video: &String, image: &String) -> ExitStatus {
         .arg("-c:a")
         .arg("copy")
         .arg(&output_filename)
-        .status()
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
         .expect("Something went wrong while adding image to videos.");
+
+    if let Some(ref mut stdout) = output.stdout {
+        let reader = BufReader::new(stdout);
+
+        for potential_line in reader.lines() {
+            let line = potential_line.expect("Failed to read a line!");
+            if !line.starts_with("frame=") { continue };
+
+            let current_frame = &line
+                .split("=")
+                .collect::<Vec<&str>>()[1]
+                .parse::<u64>()
+                .expect("Failed to convert to u32!");
+
+            pb.set(*current_frame);
+        }
+    }
 
     // replace old video with the new one
     remove_file(video).expect("Failed to remove a video!");
     rename(output_filename.to_string(), video).expect("Failed to rename a video!");
 
-    return exit_status;
+    pb.finish_print("Success!");
 }
 
 pub fn split_video_to_equal_parts(video: String, output_dir: String, part_length: i32, warning: bool) -> Vec<PathBuf> {
