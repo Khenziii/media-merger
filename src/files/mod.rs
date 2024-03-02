@@ -147,3 +147,19 @@ pub fn get_length_of_file(file_path: &String) -> i32 {
 
     return duration_milliseconds;
 }
+
+pub fn get_videos_fps(path: &String) -> i32 {
+    let fps_string: String = MediaFileMetadata::new(&Path::new(&path))
+        .unwrap()
+        .frame_rate
+        .unwrap();
+    let fps = fps_string
+        .split(" ")
+        .next()
+        .unwrap()
+        .to_string()
+        .parse::<i32>()
+        .unwrap();
+
+    return fps;
+}

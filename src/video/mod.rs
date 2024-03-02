@@ -1,6 +1,6 @@
-use crate::files::get_length_of_file;
+use crate::files::{get_length_of_file, get_videos_fps};
 extern crate pbr;
-use std::process::{Command, ExitStatus, exit, Stdio, ChildStdout};
+use std::process::{Command, exit, Stdio, ChildStdout};
 use std::io;
 use std::path::{PathBuf, Path};
 use std::fs::{remove_file, rename};
@@ -26,7 +26,7 @@ fn update_progress_bar(stdout: &mut ChildStdout, pb: &mut ProgressBar<Stdout>) {
 
 fn split_video(start_milliseconds: i32, length_milliseconds: i32, input_file: &String, output_file: &String) -> PathBuf {
     let length_seconds = length_milliseconds / 1000;
-    let total_frames = length_seconds * 30; // TODO: Get accurate framerate later
+    let total_frames = length_seconds * get_videos_fps(input_file);
     let mut pb = ProgressBar::new(total_frames as u64);
     pb.format("[=>#]");
 
@@ -69,7 +69,7 @@ fn add_audio_to_video(video: &String, audio: &String) {
     let output_filename = format!("{}/{}_temp.mp4", video_parent_folder, video_without_extension);
 
     let length_seconds = get_length_of_file(video) / 1000;
-    let total_frames = length_seconds * 30; // TODO: Get accurate framerate later
+    let total_frames = length_seconds * get_videos_fps(video);
     let mut pb = ProgressBar::new(total_frames as u64);
     pb.format("[=>#]");
 
@@ -117,7 +117,7 @@ fn add_image_to_video(video: &String, image: &String) {
     let output_filename = format!("{}/{}_temp.mp4", video_parent_folder, video_without_extension);
 
     let length_seconds = get_length_of_file(video) / 1000;
-    let total_frames = length_seconds * 30; // TODO: Get accurate framerate later
+    let total_frames = length_seconds * get_videos_fps(video);
     let mut pb = ProgressBar::new(total_frames as u64);
     pb.format("[=>#]");
 
