@@ -5,16 +5,14 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        targets:
-          - x86_64-unknown-linux-gnu
-          - x86_64-pc-windows-gnu
-          - i686-unknown-linux-gnu
-          - i686-pc-windows-gnu
-          - arm-unknown-linux-gnueabihf
-          - aarch64-pc-windows-msvc
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -25,14 +23,8 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Install cross
-        run: cargo install cross
-
-      - name: Add targets
-        run: rustup target add ${{ matrix.targets }}
-
-      - name: Build for ${{ matrix.targets }}
-        run: cross build --release --target ${{ matrix.targets }}
+      - name: Build for ${{ matrix.os }}
+        run: cargo build --release
 
       - name: Upload Binary To Release
         uses: actions/upload-release-asset@v1
@@ -40,5 +32,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/${{ matrix.targets }}/release/media-merger
-          asset_name: media-merger-${{ matrix.targets }}
+          asset_path: ./target/release/media-merger
+          asset_name: media-merger-${{ matrix.os }}
