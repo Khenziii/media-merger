@@ -5,8 +5,9 @@ on:
 
 jobs:
   build-x86_64-w64-mingw32:
-    uses: ./.github/workflows/builds/x86_64-w64-mingw32
+    uses: ./.github/workflows/build-x86_64-w64-mingw32.yml
     secrets: inherit
+
   build-x86_64-unknown-linux-gnu:
-    uses: ./.github/workflows/builds/x86_64-unknown-linux-gnu
+    uses: ./.github/workflows/build-x86_64-unknown-linux-gnu.yml
     secrets: inherit
