@@ -30,3 +30,4 @@ jobs:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./target/release/media-merger
           asset_name: media-merger-linux
+          asset_content_type: application/octet-stream
