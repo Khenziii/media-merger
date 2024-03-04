@@ -6,17 +6,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Build (x86_64-unknown-linux-gnu)
         uses: ./.github/workflows/builds/x86_64-unknown-linux-gnu
-        with:
-          secrets: inherit
+        secrets: inherit
 
       - name: Build (x86_64-pc-windows-gnu)
         uses: ./.github/workflows/builds/x86_64-pc-windows-gnu
-        with:
-          secrets: inherit
+        secrets: inherit
