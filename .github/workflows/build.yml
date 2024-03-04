@@ -12,8 +12,10 @@ jobs:
 
       - name: Build (x86_64-unknown-linux-gnu)
         uses: ./.github/workflows/builds/x86_64-unknown-linux-gnu
-        secrets: inherit
+        with:
+          token_github: ${{ secrets.TOKEN_GITHUB }}
 
       - name: Build (x86_64-pc-windows-gnu)
         uses: ./.github/workflows/builds/x86_64-pc-windows-gnu
-        secrets: inherit
+        with:
+          token_github: ${{ secrets.TOKEN_GITHUB }}
