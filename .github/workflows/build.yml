@@ -15,7 +15,7 @@ jobs:
           - i686-pc-windows-gnu
           - arm-unknown-linux-gnueabihf
           - aarch64-pc-windows-msvc
-        fail-fast: false
+      fail-fast: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
