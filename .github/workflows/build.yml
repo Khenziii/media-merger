@@ -16,6 +16,9 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Install pkg-config stuff
+        run: sudo apt install pkg-config libavutil-dev libavformat-dev libavfilter-dev
+
       - name: Build
         run: cargo build --release
 
