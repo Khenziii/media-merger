@@ -17,4 +17,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build (${{ matrix.builds }})
-        uses: ./.github/actions/build/${{ matrix.builds }
+        uses: ./.github/actions/build/${{ matrix.builds }}
