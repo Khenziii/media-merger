@@ -8,39 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        targets:
+        builds:
           - x86_64-unknown-linux-gnu
-          - x86_64-pc-windows-gnu
-          - i686-unknown-linux-gnu
-          - i686-pc-windows-gnu
-          - arm-unknown-linux-gnueabihf
-          - aarch64-pc-windows-msvc
       fail-fast: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Add target
-        run: rustup target add ${{ matrix.targets }}
-
-      - name: Install pkg-config stuff
-        run: sudo apt install pkg-config libavutil-dev libavformat-dev libavfilter-dev
-
-      - name: Build
-        run: cargo build --release --target ${{ matrix.targets }}
-
-      - name: Upload Binary To Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/${{ matrix.targets }}/release/media-merger
-          asset_name: media-merger-${{ matrix.targets }}
-          asset_content_type: application/octet-stream
+      - name: Build (${{ matrix.builds }})
+        uses: ./.github/actions/build/${{ matrix.builds }
