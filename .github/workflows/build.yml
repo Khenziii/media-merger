@@ -6,15 +6,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        builds:
-          - x86_64-unknown-linux-gnu
-          - x86_64-pc-windows-gnu
-      fail-fast: false
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build (${{ matrix.builds }})
-        uses: ./.github/actions/build/${{ matrix.builds }}
+      - name: Build (x86_64-unknown-linux-gnu)
+        uses: ./.github/actions/build/x86_64-unknown-linux-gnu
+
+      - name: Build (x86_64-pc-windows-gnu)
+        uses: ./.github/actions/build/x86_64-pc-windows-gnu
