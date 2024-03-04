@@ -10,6 +10,7 @@ jobs:
       matrix:
         builds:
           - x86_64-unknown-linux-gnu
+          - x86_64-pc-windows-gnu
       fail-fast: false
     steps:
       - name: Checkout code
