@@ -24,7 +24,7 @@ jobs:
         run: sudo apt install pkg-config libavutil-dev libavformat-dev libavfilter-dev
 
       - name: Build
-        run: cargo builds --release --target x86_64-unknown-linux-gnu
+        run: cargo build --release --target x86_64-unknown-linux-gnu
 
       - name: Upload Binary To Release
         uses: actions/upload-release-asset@v1
