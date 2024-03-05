@@ -22,6 +22,7 @@ jobs:
 
       - name: Build
         run: PKG_CONFIG_SYSROOT_DIR=/ cargo build --release --target x86_64-pc-windows-gnu
+        shell: bash
 
       - name: Upload Binary To Release
         uses: actions/upload-release-asset@v1
