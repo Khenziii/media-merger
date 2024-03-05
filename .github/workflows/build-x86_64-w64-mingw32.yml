@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -17,17 +17,11 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Install sysroot
-        run: sudo apt-get install gcc-mingw-w64-x86-64 -y
-
-      - name: Install pkg-config stuff
-        run: sudo apt install pkg-config libavutil-dev libavformat-dev libavfilter-dev
-
       - name: Add target
         run: rustup target add x86_64-pc-windows-gnu
 
       - name: Build
-        run: PKG_CONFIG_SYSROOT_DIR=/usr/x86_64-w64-mingw32 PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/lib/pkgconfig cargo build --release --target x86_64-pc-windows-gnu
+        run: cargo build --release --target x86_64-pc-windows-gnu
 
       - name: Upload Binary To Release
         uses: actions/upload-release-asset@v1
