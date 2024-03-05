@@ -21,7 +21,7 @@ jobs:
         run: rustup target add x86_64-pc-windows-gnu
 
       - name: Build
-        run: cargo build --release --target x86_64-pc-windows-gnu
+        run: PKG_CONFIG_SYSROOT_DIR=/ cargo build --release --target x86_64-pc-windows-gnu
 
       - name: Upload Binary To Release
         uses: actions/upload-release-asset@v1
@@ -29,5 +29,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/x86_64-pc-windows-gnu/release/media-merger
+          asset_path: ./target/x86_64-pc-windows-gnu/release/*.exe
           asset_name: media-merger-x86_64-pc-windows-gnu
