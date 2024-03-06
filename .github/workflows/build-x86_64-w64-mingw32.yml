@@ -27,7 +27,7 @@ jobs:
         run: rustup target add x86_64-pc-windows-gnu
 
       - name: Build
-        run: PKG_CONFIG_SYSROOT_DIR=/usr/x86_64-w64-mingw32 PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/lib/pkgconfig cargo build --release --target x86_64-pc-windows-gnu
+        run: TARGET_PKG_CONFIG_SYSROOT_DIR=/usr/x86_64-w64-mingw32 PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu cargo build --release --target x86_64-pc-windows-gnu
         shell: bash
 
       - name: Upload Binary To Release
