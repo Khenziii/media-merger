@@ -115,7 +115,7 @@ pub fn get_length_of_file(file_path: &String) -> i32 {
 
 pub fn get_videos_fps(path: &String) -> i32 {
     let metadata = ffprobe::ffprobe(Path::new(path)).unwrap();
-    let fps = &metadata.streams[0].avg_frame_rate;
+    let fps = &metadata.streams[0].avg_frame_rate.split("/").collect::<Vec<&str>>()[0];
 
     return fps.parse::<f32>().expect("Got invalid fps count!").round() as i32;
 }
