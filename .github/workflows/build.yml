@@ -11,8 +11,13 @@ jobs:
         targets:
           - x86_64-unknown-linux-gnu
           - x86_64-pc-windows-gnu
+          - x86_64-apple-darwin
           - i686-unknown-linux-gnu
           - i686-pc-windows-gnu
+          - i686-apple-darwin
+          - aarch64-unknown-linux-gnu
+          - aarch64-pc-windows-gnu
+          - aarch64-apple-darwin
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -32,7 +37,7 @@ jobs:
       - name: Build for ${{ matrix.targets }}
         run: cross build --release --target ${{ matrix.targets }}
 
-      - name: Upload Binary To Release (Linux)
+      - name: Upload Binary To Release (Linux & MacOS)
         if: contains(matrix.targets, 'linux')
         uses: actions/upload-release-asset@v1
         env:
