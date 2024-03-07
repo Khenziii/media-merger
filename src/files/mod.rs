@@ -1,37 +1,6 @@
 use std::{env, fs};
 use std::path::{Path, PathBuf};
-use metadata::media_file::MediaFileMetadata;
-
-/// converts a string in this format: "HH:MM:SS.ss"
-/// (where HH = hours, MM = minutes, SS = seconds, ss = milliseconds)
-/// to a number of milliseconds
-fn convert_duration_to_milliseconds_from_string(string: String) -> i32 {
-    let parts: Vec<&str> = string.split(":").collect();
-    if parts.len() == 3 {
-        let error_message = "Something went wrong while parsing";
-
-        let hours = parts[0]
-            .parse::<i32>()
-            .expect(&*format!("{} hours. Tried to parse: {}", error_message, parts[0]));
-        let minutes = parts[1]
-            .parse::<i32>()
-            .expect(&*format!("{} minutes. Tried to parse: {}", error_message, parts[1]));
-
-        let seconds_and_milliseconds: Vec<&str> = parts[2]
-            .split(".")
-            .collect();
-        let seconds = seconds_and_milliseconds[0]
-            .parse::<i32>()
-            .expect(&*format!("{} seconds. Tried to parse: {}", error_message, seconds_and_milliseconds[0]));
-        let milliseconds = seconds_and_milliseconds[1]
-            .parse::<i32>()
-            .expect(&*format!("{} milliseconds. Tried to parse: {}", error_message, seconds_and_milliseconds[1]));
-
-        return hours * 1000 * 60 * 60 + minutes * 1000 * 60 + seconds * 1000 + milliseconds;
-    }
-
-    panic!("Failed to convert the duration String to i32.");
-}
+use ffprobe;
 
 #[derive(Debug)]
 pub struct Files {
@@ -138,28 +107,27 @@ pub fn validate_env(input_dir: &str, output_dir: &str) {
 }
 
 pub fn get_length_of_file(file_path: &String) -> i32 {
-    let metadata = MediaFileMetadata::new(&Path::new(&file_path)).unwrap();
-    let duration_string: String = match metadata.duration {
-        Some(s) => s,
-        None => panic!("The file is probably corrupted."),
-    };
-    let duration_milliseconds = convert_duration_to_milliseconds_from_string(duration_string);
+    let metadata = ffprobe::ffprobe(Path::new(file_path)).unwrap();
+    let duration = &metadata
+        .streams
+        .first()
+        .expect("A file didn't contain any streams??")
+        .duration
+        .clone()
+        .expect("Failed to get media file's duration!");
 
-    return duration_milliseconds;
+    return duration.parse::<f32>().expect("Got invalid media file's duration!").round() as i32;
 }
 
 pub fn get_videos_fps(path: &String) -> i32 {
-    let fps_string: String = MediaFileMetadata::new(&Path::new(&path))
-        .unwrap()
-        .frame_rate
-        .unwrap();
-    let fps = fps_string
-        .split(" ")
-        .next()
-        .unwrap()
-        .to_string()
-        .parse::<i32>()
-        .unwrap();
+    let metadata = ffprobe::ffprobe(Path::new(path)).unwrap();
+    let fps = &metadata
+        .streams
+        .first()
+        .expect("A file didn't contain any streams??")
+        .avg_frame_rate
+        .split("/")
+        .collect::<Vec<&str>>()[0];
 
-    return fps;
+    return fps.parse::<f32>().expect("Got invalid fps count!").round() as i32;
 }
