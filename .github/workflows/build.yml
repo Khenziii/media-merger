@@ -32,12 +32,24 @@ jobs:
       - name: Build for ${{ matrix.targets }}
         run: cross build --release --target ${{ matrix.targets }}
 
-      - name: Upload Binary To Release
+      - name: Upload Binary To Release (Linux)
+        if: contains(matrix.targets, 'linux')
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./target/${{ matrix.targets }}/release/media-merger
+          asset_name: media-merger-${{ matrix.targets }}
+          asset_content_type: application/octet-stream
+
+      - name: Upload Binary To Release (Windows)
+        if: contains(matrix.targets, 'windows')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./target/${{ matrix.targets }}/release/media-merger.exe
           asset_name: media-merger-${{ matrix.targets }}
           asset_content_type: application/octet-stream
