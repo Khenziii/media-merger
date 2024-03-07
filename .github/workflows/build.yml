@@ -13,8 +13,6 @@ jobs:
           - x86_64-pc-windows-gnu
           - i686-unknown-linux-gnu
           - i686-pc-windows-gnu
-          - arm-unknown-linux-gnueabihf
-          - aarch64-pc-windows-msvc
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -42,3 +40,4 @@ jobs:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./target/${{ matrix.targets }}/release/media-merger
           asset_name: media-merger-${{ matrix.targets }}
+          asset_content_type: application/octet-stream
