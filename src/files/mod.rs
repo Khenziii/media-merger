@@ -108,14 +108,26 @@ pub fn validate_env(input_dir: &str, output_dir: &str) {
 
 pub fn get_length_of_file(file_path: &String) -> i32 {
     let metadata = ffprobe::ffprobe(Path::new(file_path)).unwrap();
-    let duration = &metadata.streams[0].duration.clone().expect("Failed to get media file's duration!");
+    let duration = &metadata
+        .streams
+        .first()
+        .expect("A file didn't contain any streams??")
+        .duration
+        .clone()
+        .expect("Failed to get media file's duration!");
 
     return duration.parse::<f32>().expect("Got invalid media file's duration!").round() as i32;
 }
 
 pub fn get_videos_fps(path: &String) -> i32 {
     let metadata = ffprobe::ffprobe(Path::new(path)).unwrap();
-    let fps = &metadata.streams[0].avg_frame_rate.split("/").collect::<Vec<&str>>()[0];
+    let fps = &metadata
+        .streams
+        .first()
+        .expect("A file didn't contain any streams??")
+        .avg_frame_rate
+        .split("/")
+        .collect::<Vec<&str>>()[0];
 
     return fps.parse::<f32>().expect("Got invalid fps count!").round() as i32;
 }
