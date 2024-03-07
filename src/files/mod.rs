@@ -108,7 +108,7 @@ pub fn validate_env(input_dir: &str, output_dir: &str) {
 
 pub fn get_length_of_file(file_path: &String) -> i32 {
     let metadata = ffprobe::ffprobe(Path::new(file_path)).unwrap();
-    let duration = &metadata.streams[0].duration.expect("Failed to get media file's duration!");
+    let duration = &metadata.streams[0].duration.clone().expect("Failed to get media file's duration!");
 
     return duration.parse::<i32>().expect("Got invalid media file's duration!");
 }
