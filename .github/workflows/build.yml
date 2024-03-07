@@ -11,7 +11,6 @@ jobs:
         targets:
           - x86_64-unknown-linux-gnu
           - x86_64-pc-windows-gnu
-          - x86_64-apple-darwin
           - i686-unknown-linux-gnu
           - i686-pc-windows-gnu
           - aarch64-unknown-linux-gnu
@@ -36,7 +35,7 @@ jobs:
         run: cross build --release --target ${{ matrix.targets }}
 
       - name: Upload Binary To Release (Linux & MacOS)
-        if: contains(matrix.targets, 'linux')
+        if: contains(matrix.targets, 'linux') || contains(matrix.targets, 'darwin')
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
