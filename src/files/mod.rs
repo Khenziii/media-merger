@@ -117,5 +117,5 @@ pub fn get_videos_fps(path: &String) -> i32 {
     let metadata = ffprobe::ffprobe(Path::new(path)).unwrap();
     let fps = &metadata.streams[0].avg_frame_rate;
 
-    return fps.parse::<i32>().expect("Got invalid fps count!");
+    return fps.parse::<f32>().expect("Got invalid fps count!").round() as i32;
 }
