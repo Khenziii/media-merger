@@ -53,5 +53,5 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./target/${{ matrix.targets }}/release/media-merger.exe
-          asset_name: media-merger-${{ matrix.targets }}
+          asset_name: media-merger-${{ matrix.targets }}.exe
           asset_content_type: application/octet-stream
